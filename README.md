@@ -1,185 +1,275 @@
 # Dealership Email Assistant
 
-This app connects to your Gmail, reads new customer emails, uses AI to draft replies, and shows you a simple dashboard where you can review and send each reply — or skip it. **Nothing sends automatically. You approve every reply before it goes out.**
+This app reads new customer emails from your Gmail, uses AI to write a draft reply, and shows you a simple screen where you can review and send each reply — or skip it.
+
+**Nothing sends automatically. You approve every reply before it goes out.**
 
 ---
 
-## What You Need Before Starting
+## What This Does
 
-1. A computer with **Node.js** installed
-2. A **Google account** (the Gmail inbox this will connect to)
-3. An **Anthropic API key** (for the AI reply drafting)
-
----
-
-## Step 1 — Install Node.js (if you haven't already)
-
-1. Go to [https://nodejs.org](https://nodejs.org)
-2. Download the **LTS** version (the one that says "Recommended for most users")
-3. Run the installer and follow the steps
-4. When done, open a command prompt and type: `node --version`
-   - You should see something like `v20.11.0`. If you do, you're good!
+- Checks your Gmail inbox on a schedule (every 10 minutes by default)
+- Drafts a reply for each new customer email
+- Shows you a dashboard where you read, edit, and click Send or Skip
+- Keeps a log of everything sent or skipped
 
 ---
 
-## Step 2 — Get Your Anthropic API Key
+## What You'll Need
 
-1. Go to [https://console.anthropic.com](https://console.anthropic.com)
-2. Sign in (or create a free account)
-3. Click **API Keys** in the left menu
-4. Click **Create Key**, give it a name like "Dealership App"
-5. Copy the key — it starts with `sk-ant-...`
-6. Save it somewhere safe — you'll need it in Step 4
+- A Windows computer
+- Internet connection
+- A Gmail account (the one you want to connect)
+- An Anthropic API key (for the AI — free to sign up)
+- Google credentials (explained below — takes about 10 minutes to set up)
 
 ---
 
-## Step 3 — Set Up Google OAuth Credentials
+## STEP 1 — Download the App
 
-This lets the app read and send email from your Gmail account.
+You have two options. Option A is easier if you've never used Git.
 
-1. Go to [https://console.cloud.google.com](https://console.cloud.google.com)
-2. Click the project dropdown at the top → **New Project**
-   - Name it something like "Dealership Email App" → click **Create**
-3. In the left menu, go to **APIs & Services → Library**
-   - Search for **Gmail API** → click it → click **Enable**
-4. In the left menu, go to **APIs & Services → OAuth consent screen**
-   - Choose **External** → click **Create**
-   - Fill in **App name** (e.g. "Dealership Email") and your email → click **Save and Continue**
-   - On the Scopes page, click **Save and Continue** (no changes needed)
-   - On the Test users page, click **+ Add Users**, enter your Gmail address → click **Save and Continue**
-5. In the left menu, go to **APIs & Services → Credentials**
-   - Click **+ Create Credentials → OAuth client ID**
-   - Application type: **Web application**
-   - Name: anything you want
-   - Under **Authorized redirect URIs**, click **+ Add URI** and enter:
-     ```
-     http://localhost:3000/auth/callback
-     ```
+### Option A — Download as a ZIP file (easiest)
+
+1. Go to: **https://github.com/drewkeriazes/dealership-auto-responder**
+2. Click the green **Code** button
+3. Click **Download ZIP**
+4. Once downloaded, find the ZIP file in your Downloads folder
+5. Right-click it → **Extract All** → choose where to save it (e.g. your Desktop)
+6. Open the extracted folder — it's called `dealership-auto-responder-main`
+
+### Option B — Use Git (if you already have it installed)
+
+Open Command Prompt and run:
+```
+git clone https://github.com/drewkeriazes/dealership-auto-responder.git
+cd dealership-auto-responder
+```
+
+---
+
+## STEP 2 — Install Node.js
+
+Node.js is the engine that runs the app. You only need to install this once.
+
+1. Go to: **https://nodejs.org**
+2. Click the big button that says **"LTS — Recommended for most users"**
+3. Run the downloaded installer — just click Next through everything
+4. When it's done, open Command Prompt (search "cmd" in the Start menu)
+5. Type `node --version` and press Enter
+   - You should see something like `v20.11.0`
+   - If you see that, Node.js is installed correctly
+
+---
+
+## STEP 3 — Install the App's Dependencies
+
+This downloads the extra code the app needs to run. You only do this once.
+
+1. Open Command Prompt
+2. Navigate to the app folder. Type this (adjust the path to match where you saved it):
+   ```
+   cd C:\Users\YourName\Desktop\dealership-auto-responder-main
+   ```
+   > **Tip:** You can also just type `cd ` (with a space), then drag the folder into the Command Prompt window, then press Enter.
+3. Run:
+   ```
+   npm install
+   ```
+4. Wait for it to finish — it'll show some text and then stop. That's normal.
+
+---
+
+## STEP 4 — Get Your Anthropic API Key
+
+This is the AI service that writes the draft replies.
+
+1. Go to: **https://console.anthropic.com**
+2. Click **Sign Up** (it's free to start)
+3. Once logged in, click **API Keys** in the left menu
+4. Click **Create Key**, name it "Dealership App"
+5. Copy the key — it looks like `sk-ant-api03-...`
+6. Paste it somewhere safe (like Notepad) — you'll need it in Step 6
+
+---
+
+## STEP 5 — Set Up Google Access
+
+This is the most involved step, but you only do it once. It allows the app to read and send email through your Gmail account.
+
+1. Go to: **https://console.cloud.google.com** and sign in with your Google account
+
+2. **Create a new project:**
+   - Click the dropdown at the very top of the page (it might say "Select a project")
+   - Click **New Project**
+   - Name it `Dealership Email App` → click **Create**
+   - Wait a moment, then make sure that project is selected in the dropdown
+
+3. **Turn on Gmail:**
+   - In the left menu, click **APIs & Services → Library**
+   - In the search box, type `Gmail API`
+   - Click **Gmail API** in the results → click **Enable**
+
+4. **Set up the permissions screen:**
+   - In the left menu, click **APIs & Services → OAuth consent screen**
+   - Select **External** → click **Create**
+   - Fill in **App name**: `Dealership Email App`
+   - Fill in **User support email**: your email address
+   - Scroll down, fill in **Developer contact information**: your email address again
+   - Click **Save and Continue**
+   - On the next screen (Scopes), click **Save and Continue** — don't change anything
+   - On the next screen (Test users), click **+ Add Users**
+     - Enter the Gmail address you want to connect
+     - Click **Add**, then **Save and Continue**
+   - Click **Back to Dashboard**
+
+5. **Create your credentials:**
+   - In the left menu, click **APIs & Services → Credentials**
+   - Click **+ Create Credentials** → **OAuth client ID**
+   - For **Application type**, choose **Web application**
+   - For **Name**, type anything (e.g. `Dealership App`)
+   - Under **Authorized redirect URIs**, click **+ Add URI**
+   - Type exactly: `http://localhost:3000/auth/callback`
    - Click **Create**
-6. A popup will show your **Client ID** and **Client Secret** — copy both
+   - A popup will appear with your **Client ID** and **Client Secret**
+   - Copy both — paste them into Notepad for the next step
 
 ---
 
-## Step 4 — Fill In Your Settings
+## STEP 6 — Fill In Your Settings
 
-1. Open the `dealer-email-app` folder on your computer
-2. Open the file called `.env` in any text editor (Notepad works fine)
-3. Fill in each line with your values:
+1. Open the app folder
+2. Find the file called `.env` — right-click it → **Open with** → **Notepad**
+   > If you can't see `.env`, Windows may be hiding it. In File Explorer, click **View** at the top and check **Hidden items**.
+3. Fill in the values you collected:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-client-secret-here
+ANTHROPIC_API_KEY=paste-your-anthropic-key-here
+GOOGLE_CLIENT_ID=paste-your-client-id-here
+GOOGLE_CLIENT_SECRET=paste-your-client-secret-here
 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
 PORT=3000
 CHECK_INTERVAL_MINUTES=10
 ```
 
-4. Save the file
+4. Save the file (Ctrl+S)
 
 ---
 
-## Step 5 — Edit Your Dealership Info
+## STEP 7 — Customize Your Dealership Info
 
-1. Open the file `dealership-profile.js`
-2. Near the top, you'll see text like `[DEALERSHIP NAME]`, `[OWNER NAME]`, etc.
-3. Replace everything in square brackets with your real information
-4. Save the file
+The AI uses this information to write replies in your voice.
 
-This is what the AI uses to write replies in your voice.
+1. Open the file `dealership-profile.js` in Notepad
+2. Replace everything in `[square brackets]` with your real info:
+   - `[DEALERSHIP NAME]` → your dealership's name
+   - `[OWNER NAME]` → your name
+   - `[CITY, STATE]` → your city and state
+   - `[PHONE NUMBER]` → your phone number
+   - `[WEBSITE URL]` → your website (or remove the line if you don't have one)
+   - `[HOURS]` → your business hours
+3. Save the file (Ctrl+S)
 
 ---
 
-## Step 6 — Verify Your Setup
+## STEP 8 — Check That Everything Is Set Up
 
-Open a command prompt, navigate to the `dealer-email-app` folder, and run:
+1. Open Command Prompt
+2. Navigate to the app folder (same as Step 3)
+3. Run:
+   ```
+   node setup-check.js
+   ```
+4. You should see green checkmarks (✓) next to each item
+5. If you see any red X marks, go back and fix the missing values in `.env`
 
+---
+
+## STEP 9 — Start the App
+
+**Option A — Double-click to start (easiest):**
+
+Double-click the file called `start.bat` in the app folder.
+
+A black window will open and show:
 ```
-node setup-check.js
+Starting Dealership Email Assistant...
+Once started, open your browser and go to: http://localhost:3000
 ```
 
-You should see green checkmarks next to each setting. If you see any red X marks, go back and fill in the missing values.
-
----
-
-## Step 7 — Start the App
-
-In the same command prompt, run:
+**Option B — Command Prompt:**
 
 ```
 node server.js
 ```
 
-You should see:
-```
-Dealership Email Assistant running at http://localhost:3000
-Inbox will be checked every 10 minutes.
-Gmail not connected yet. Visit http://localhost:3000 and click "Connect Gmail".
-```
-
-Leave this window open. The app runs as long as this window is open.
+**Leave this window open.** The app only runs while the window is open. If you close it, the app stops.
 
 ---
 
-## Step 8 — Connect Your Gmail
+## STEP 10 — Connect Your Gmail
 
-1. Open your web browser and go to: [http://localhost:3000](http://localhost:3000)
-2. You'll see a yellow banner that says "Connect your Gmail account"
-3. Click **Connect Gmail**
-4. A Google sign-in page will open — sign in with the Gmail account you want to use
-5. Click **Allow** to grant the app access
-6. You'll be sent back to the dashboard, and the banner at the top will now say **Connected**
+1. Open your web browser (Chrome, Edge, etc.)
+2. Go to: **http://localhost:3000**
+3. You'll see a yellow banner — click **Connect Gmail**
+4. Google's sign-in page will open — sign in with your Gmail account
+5. Click **Allow** when it asks for permission
+6. You'll be brought back to the dashboard
+7. The top of the page will now show a green **Connected** badge
+
+You're all set!
 
 ---
 
 ## Using the Dashboard
 
-**Check Inbox Now** — Click this to immediately check for new customer emails. New draft replies will appear on the page.
+**Check Inbox Now** — Click to immediately check for new emails (otherwise it checks automatically every 10 minutes)
 
-**Each Email Card:**
-- Shows who it's from, what it's about, and when it arrived
-- Shows the original email text (for your reference)
-- Has an editable text box with the AI's suggested reply
-- **You can edit the reply** before sending — just click in the text box and type
+**Each email card shows:**
+- Who it's from and what it's about
+- The original email text
+- A text box with the AI's draft reply — **you can edit this before sending**
 
-**Send This Reply** — Sends the reply through your Gmail and logs it
+**Send This Reply** — Sends the email through Gmail and logs it
 
-**Skip — I'll Handle It** — Removes the card without sending anything. You can reply manually through Gmail later.
+**Skip — I'll Handle It** — Removes the card. No email is sent. You can reply manually from Gmail later.
 
-**Yellow border cards** — These were flagged by the AI as potentially needing your closer attention. Review them carefully before sending.
+**Yellow border** — The AI flagged this email as something you should look at carefully before sending.
 
-**Recent Activity** — Shows the last 10 emails that were sent or skipped, with timestamps.
+**Recent Activity** — Shows the last 10 emails that were sent or skipped.
 
 ---
 
-## Stopping the App
+## Every Day: How to Start and Stop
 
-Press `Ctrl + C` in the command prompt window to stop the server.
+**To start:** Double-click `start.bat` (or run `node server.js` in Command Prompt)
 
-To start it again later, just run `node server.js` again.
+**To stop:** Close the black Command Prompt window, or press `Ctrl + C` inside it
 
 ---
 
 ## Troubleshooting
 
-**"Cannot find module" error on startup**
-Run `npm install` in the `dealer-email-app` folder first.
+**"Cannot find module" error**
+Run `npm install` in the app folder, then try again.
 
-**Gmail says "Access blocked" during OAuth**
-Your Google app is in test mode. Go back to Google Cloud Console → OAuth consent screen → Test users, and make sure your email is added as a test user.
+**"Gmail not connected" or the connect button isn't working**
+Go through the Connect Gmail steps again — it only takes a few seconds.
 
-**"Gmail not connected" after OAuth**
-The `tokens.json` file may have been deleted. Just click "Connect Gmail" again to go through the OAuth flow.
+**Gmail shows "Access blocked"**
+Your Google app is still in test mode. Go to Google Cloud Console → APIs & Services → OAuth consent screen → Test users, and add your Gmail address.
 
-**Emails aren't showing up**
-- Make sure the emails are unread and in your Inbox (not Spam or Promotions)
-- Click "Check Inbox Now" to trigger an immediate check
-- Check the command prompt window for any error messages
+**Emails aren't showing up after clicking "Check Inbox Now"**
+- Make sure the emails are unread and sitting in your main Inbox (not Promotions or Spam)
+- Check the black Command Prompt window for any error messages in red
+
+**The app isn't running / browser says "This site can't be reached"**
+The app window was probably closed. Double-click `start.bat` to start it again.
 
 ---
 
-## Privacy & Security
+## Your Privacy
 
-- Your Gmail tokens are stored locally in `tokens.json` on your computer — they never leave your machine
-- Emails are sent to Anthropic's API for AI processing (subject to Anthropic's privacy policy)
-- The `.env` file with your keys is never shared or committed to any code repository
+- Your Gmail login is saved in a file called `tokens.json` on your computer only — it never goes anywhere else
+- Email content is sent to Anthropic's AI service to generate replies
+- Your API keys in `.env` are never shared or uploaded anywhere
