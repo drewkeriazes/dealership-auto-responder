@@ -1,17 +1,18 @@
 # Dealership Email Assistant
 
-This app reads new customer emails from your Gmail, uses AI to write a draft reply, and shows you a simple screen where you can review and send each reply — or skip it.
+This app reads new customer emails from your Gmail, uses AI to write a reply, and **sends it automatically**. You don't have to do anything for normal inquiries — it just handles them.
 
-**Nothing sends automatically. You approve every reply before it goes out.**
+The dashboard shows you a log of everything sent, and flags the rare emails that need a personal response from you (complaints, unusual situations, etc.).
 
 ---
 
 ## What This Does
 
-- Checks your Gmail inbox on a schedule (every 10 minutes by default)
-- Drafts a reply for each new customer email
-- Shows you a dashboard where you read, edit, and click Send or Skip
-- Keeps a log of everything sent or skipped
+- Checks your Gmail inbox every 10 minutes automatically
+- Replies automatically to customer inquiries: vehicle questions, price questions, appointment requests, trade-ins, and general questions
+- Skips spam and vendor emails without replying
+- Flags anything unusual (complaints, legal threats, low-confidence emails) for you to handle personally
+- Keeps a full log of every reply sent
 
 ---
 
@@ -223,20 +224,15 @@ You're all set!
 
 ## Using the Dashboard
 
-**Check Inbox Now** — Click to immediately check for new emails (otherwise it checks automatically every 10 minutes)
+**Check Inbox Now** — Click to immediately check for new emails instead of waiting for the automatic check
 
-**Each email card shows:**
-- Who it's from and what it's about
-- The original email text
-- A text box with the AI's draft reply — **you can edit this before sending**
+**Needs Your Attention** — These are emails the AI flagged as too sensitive to reply to automatically (complaints, unusual situations, or anything it wasn't confident about). Each card shows the original email and a suggested reply you can edit and send — or dismiss if you'd rather handle it from Gmail directly.
 
-**Send This Reply** — Sends the email through Gmail and logs it
+**Send This Reply** — Sends the reply shown and logs it
 
-**Skip — I'll Handle It** — Removes the card. No email is sent. You can reply manually from Gmail later.
+**Dismiss — I'll Handle It Myself** — Removes the card. No reply is sent. Handle it from Gmail on your own.
 
-**Yellow border** — The AI flagged this email as something you should look at carefully before sending.
-
-**Recent Activity** — Shows the last 10 emails that were sent or skipped.
+**Recent Activity** — Shows the last 10 emails that were auto-replied, sent manually, or skipped — with timestamps.
 
 ---
 
