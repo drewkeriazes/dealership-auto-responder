@@ -14,8 +14,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const LOG_PATH = path.join(__dirname, 'email_log.json');
 
+// Categories that get an automatic reply — no approval needed
+const AUTO_REPLY_CATEGORIES = new Set([
+  'VEHICLE_INQUIRY',
+  'APPOINTMENT_REQUEST',
+  'PRICE_QUESTION',
+  'TRADE_IN',
+  'FOLLOW_UP',
+  'GENERAL_QUESTION',
+]);
+
 // ── In-memory state ──────────────────────────────────────────────────────────
-let pendingQueue = [];
+let pendingQueue = []; // only holds emails that need manual attention
 let lastCheck = null;
 let checkInProgress = false;
 let lastManualCheck = 0; // timestamp for rate-limiting /api/check-now
@@ -81,6 +91,9 @@ async function checkInbox() {
         continue;
       }
 
+      // Emails that need a human: queue for manual review, don't auto-reply
+      const needsHuman = classification.category === 'NEEDS_HUMAN' || classification.confidence < 70;
+
       let draft;
       try {
         draft = await draftReply(email.body, email.subject, email.fromName, classification.category);
@@ -94,20 +107,52 @@ async function checkInbox() {
         };
       }
 
-      // Override suggested_action if NEEDS_HUMAN or low confidence
-      if (classification.category === 'NEEDS_HUMAN' || classification.confidence < 70) {
+      if (needsHuman) {
+        // Put in manual queue — owner will handle these
         draft.suggested_action = 'NEEDS_REVIEW';
-        if (!draft.reason) draft.reason = 'Low confidence or flagged category — please review.';
+        if (!draft.reason) draft.reason = 'Flagged for manual review — please respond yourself.';
+        pendingQueue.push({
+          id: uuidv4(),
+          originalEmail: email,
+          draftReply: draft,
+          category: classification.category,
+          confidence: classification.confidence,
+          createdAt: new Date().toISOString(),
+        });
+        console.log(`[MANUAL] Queued for review: "${email.subject}" from ${email.from}`);
+      } else if (AUTO_REPLY_CATEGORIES.has(classification.category)) {
+        // Auto-send immediately
+        try {
+          await sendReply(email.threadId, email.from, draft.subject, draft.body);
+          await markAsHandled(email.id);
+          appendLog({
+            id: email.id,
+            from: email.from,
+            fromName: email.fromName,
+            subject: email.subject,
+            receivedAt: email.receivedAt,
+            category: classification.category,
+            confidence: classification.confidence,
+            action: 'SENT',
+            replySentAt: new Date().toISOString(),
+            replyBody: draft.body,
+          });
+          console.log(`[AUTO-SENT] Reply sent to ${email.from} — "${email.subject}"`);
+        } catch (err) {
+          console.error(`Auto-send failed for ${email.id}:`, err.message);
+          // Fall back to manual queue so it isn't lost
+          draft.suggested_action = 'NEEDS_REVIEW';
+          draft.reason = `Auto-send failed: ${err.message}`;
+          pendingQueue.push({
+            id: uuidv4(),
+            originalEmail: email,
+            draftReply: draft,
+            category: classification.category,
+            confidence: classification.confidence,
+            createdAt: new Date().toISOString(),
+          });
+        }
       }
-
-      pendingQueue.push({
-        id: uuidv4(),
-        originalEmail: email,
-        draftReply: draft,
-        category: classification.category,
-        confidence: classification.confidence,
-        createdAt: new Date().toISOString(),
-      });
     }
   } catch (err) {
     console.error('Inbox check error:', err.message);

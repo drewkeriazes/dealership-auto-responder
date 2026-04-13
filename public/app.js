@@ -71,39 +71,38 @@ function renderQueue(items) {
   const heading = document.getElementById('queue-heading');
 
   heading.textContent = items.length > 0
-    ? `Pending Replies (${items.length})`
-    : 'Pending Replies';
+    ? `Needs Your Attention (${items.length})`
+    : 'Needs Your Attention';
 
   if (items.length === 0) {
     container.innerHTML = `
       <div id="empty-state">
         <div class="checkmark">✓</div>
-        <p>You're all caught up.</p>
+        <p>Nothing needs your attention. Replies are going out automatically.</p>
       </div>`;
     return;
   }
 
   container.innerHTML = items.map((item) => {
-    const needsReview = item.draftReply.suggested_action === 'NEEDS_REVIEW';
     return `
-    <div class="email-card${needsReview ? ' needs-review' : ''}" id="card-${item.id}">
-      ${needsReview ? `<div class="review-flag">⚠ Claude flagged this for your review${item.draftReply.reason ? ': ' + escapeHtml(item.draftReply.reason) : ''}</div>` : ''}
+    <div class="email-card needs-review" id="card-${item.id}">
+      <div class="review-flag">⚠ This email needs a personal reply from you${item.draftReply.reason ? ' — ' + escapeHtml(item.draftReply.reason) : ''}</div>
       <div class="card-meta">
         <span><strong>From:</strong> ${escapeHtml(item.originalEmail.fromName)} &lt;${escapeHtml(item.originalEmail.from)}&gt;</span>
         <span><strong>Subject:</strong> ${escapeHtml(item.originalEmail.subject)}</span>
         <span><strong>Received:</strong> ${timeAgo(item.originalEmail.receivedAt)}</span>
-        <span><strong>Category:</strong> ${categoryLabel(item.category)} (${item.confidence}% confidence)</span>
+        <span><strong>Category:</strong> ${categoryLabel(item.category)}</span>
       </div>
 
       <div class="card-section-label">Original Email</div>
       <div class="original-body">${escapeHtml(item.originalEmail.body)}</div>
 
-      <div class="card-section-label">Draft Reply — edit before sending</div>
+      <div class="card-section-label">Suggested Reply — edit before sending</div>
       <textarea class="draft-textarea" id="draft-${item.id}">${escapeHtml(item.draftReply.body)}</textarea>
 
       <div class="card-actions">
         <button class="btn btn-success" onclick="approveItem('${item.id}')">Send This Reply</button>
-        <button class="btn btn-secondary" onclick="skipItem('${item.id}')">Skip — I'll Handle It</button>
+        <button class="btn btn-secondary" onclick="skipItem('${item.id}')">Dismiss — I'll Handle It Myself</button>
       </div>
     </div>`;
   }).join('');
@@ -193,15 +192,15 @@ async function skipItem(id) {
 function renderQueueCount() {
   const heading = document.getElementById('queue-heading');
   if (currentQueue.length === 0) {
-    heading.textContent = 'Pending Replies';
+    heading.textContent = 'Needs Your Attention';
     const container = document.getElementById('queue-container');
     container.innerHTML = `
       <div id="empty-state">
         <div class="checkmark">✓</div>
-        <p>You're all caught up.</p>
+        <p>Nothing needs your attention. Replies are going out automatically.</p>
       </div>`;
   } else {
-    heading.textContent = `Pending Replies (${currentQueue.length})`;
+    heading.textContent = `Needs Your Attention (${currentQueue.length})`;
   }
 }
 
@@ -214,7 +213,7 @@ async function checkNow() {
     const res = await fetch('/api/check-now', { method: 'POST' });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error');
-    showToast('Inbox check started — new emails will appear shortly.');
+    showToast('Checking inbox — customer inquiries will be replied to automatically.');
     // Refresh queue after a short delay
     setTimeout(refreshQueue, 4000);
     setTimeout(refreshQueue, 10000);
