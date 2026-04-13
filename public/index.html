@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dealership Email Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <h1>Dealership Email Assistant</h1>
+  <div id="status-bar">
+    <span id="connection-badge" class="disconnected">Not Connected</span>
+    <span id="last-check-text">Last check: —</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Connect Gmail banner (shown when not connected) -->
+  <div id="connect-banner" style="display:none">
+    <p>Connect your Gmail account to get started.</p>
+    <a href="/auth/start" class="btn btn-primary">Connect Gmail</a>
+  </div>
+
+  <!-- Pending replies section -->
+  <section id="queue-section">
+    <div class="section-header">
+      <h2 id="queue-heading">Pending Replies</h2>
+      <button id="check-now-btn" class="btn btn-primary btn-sm" onclick="checkNow()">Check Inbox Now</button>
+    </div>
+    <div id="queue-container"></div>
+  </section>
+
+  <!-- Activity log section -->
+  <section id="log-section">
+    <div class="section-header">
+      <h2>Recent Activity</h2>
+    </div>
+    <div id="log-container">
+      <p style="color:#888; font-size:0.9rem;">No activity yet.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
